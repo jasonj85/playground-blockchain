@@ -1,0 +1,8 @@
+.app {
+  padding: 0 30px;
+}
+
+.message {
+  font-weight: bold;
+  color: red;
+}
