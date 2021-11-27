@@ -20,13 +20,30 @@ contract ERC721 {
     mapping(uint256 => address) private _tokenOwner;
     mapping(address => uint256) private _tokensOwnedCount;
 
+    function balanceOf(address _owner) public view returns (uint256) {
+        require(
+            _owner != address(0),
+            "ERC721: cannot be assigned to 0 address"
+        );
+
+        return _tokensOwnedCount[_owner];
+    }
+
+    function ownerOf(uint256 _tokenId) external view returns (address) {
+        address owner = _tokenOwner[_tokenId];
+        require(owner != address(0), "ERC721: cannot be assigned to 0 address");
+
+        return owner;
+    }
+
     function _exists(uint256 tokenId) internal view returns (bool) {
         // check that tokenId exists
         address owner = _tokenOwner[tokenId];
+
         return owner != address(0);
     }
 
-    function _mint(address to, uint256 tokenId) internal {
+    function _mint(address to, uint256 tokenId) internal virtual {
         require(to != address(0), "ERC721: cannot be minted to 0 address");
         require(!_exists(tokenId), "ERC721: token has already been minted");
 
