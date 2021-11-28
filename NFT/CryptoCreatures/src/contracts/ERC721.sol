@@ -17,8 +17,15 @@ contract ERC721 {
         uint256 indexed tokenId
     );
 
+    event Approval(
+        address indexed owner,
+        address indexed approved,
+        uint256 indexed tokenId
+    );
+
     mapping(uint256 => address) private _tokenOwner;
     mapping(address => uint256) private _tokensOwnedCount;
+    mapping(uint256 => address) private _tokenApprovals;
 
     function balanceOf(address _owner) public view returns (uint256) {
         require(
@@ -29,7 +36,7 @@ contract ERC721 {
         return _tokensOwnedCount[_owner];
     }
 
-    function ownerOf(uint256 _tokenId) external view returns (address) {
+    function ownerOf(uint256 _tokenId) internal view returns (address) {
         address owner = _tokenOwner[_tokenId];
         require(owner != address(0), "ERC721: cannot be assigned to 0 address");
 
@@ -51,5 +58,18 @@ contract ERC721 {
         _tokensOwnedCount[to] += 1;
 
         emit Transfer(address(0), to, tokenId);
+    }
+
+    function approve(address to, uint256 tokenId) public {
+        address owner = ownerOf(tokenId);
+        require(to != owner, "Error - approval to current owner");
+        require(
+            msg.sender == owner,
+            "Current caller is not the owner of the token"
+        );
+
+        _tokenApprovals[tokenId] = to;
+
+        emit Approval(owner, to, tokenId);
     }
 }
