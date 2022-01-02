@@ -10,19 +10,10 @@ pragma solidity ^0.8.0;
     5. create an event that emits a transfer log
 */
 
-contract ERC721 {
-    event Transfer(
-        address indexed from,
-        address indexed to,
-        uint256 indexed tokenId
-    );
+import "./interfaces/IERC721.sol";
+import "./ERC165.sol";
 
-    event Approval(
-        address indexed owner,
-        address indexed approved,
-        uint256 indexed tokenId
-    );
-
+contract ERC721 is ERC165, IERC721 {
     mapping(uint256 => address) private _tokenOwner;
     mapping(address => uint256) private _tokensOwnedCount;
     mapping(uint256 => address) private _tokenApprovals;
@@ -36,7 +27,7 @@ contract ERC721 {
         return _tokensOwnedCount[_owner];
     }
 
-    function ownerOf(uint256 _tokenId) internal view returns (address) {
+    function ownerOf(uint256 _tokenId) public view override returns (address) {
         address owner = _tokenOwner[_tokenId];
         require(owner != address(0), "ERC721: cannot be assigned to 0 address");
 
@@ -71,5 +62,35 @@ contract ERC721 {
         _tokenApprovals[tokenId] = to;
 
         emit Approval(owner, to, tokenId);
+    }
+
+    function _transferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) internal {
+        require(
+            _to != address(0),
+            "ERC721: cannot be transferred to 0 address"
+        );
+        require(
+            ownerOf(_tokenId) == _from,
+            "Cannot transfer token that is not owned"
+        );
+
+        _tokensOwnedCount[_from] -= 1;
+        _tokensOwnedCount[_to] += 1;
+
+        _tokenOwner[_tokenId] = _to;
+
+        emit Transfer(address(0), _to, _tokenId);
+    }
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) public override {
+        _transferFrom(_from, _to, _tokenId);
     }
 }
